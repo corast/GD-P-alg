@@ -4,6 +4,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as pyplot
 from matplotlib import cm
 from itertools import product
+from matplotlib.ticker import LinearLocator, FormatStrFormatter
 
 def sigmoid(w,x):
     """ Calculate the sigmoid value
@@ -26,17 +27,13 @@ def task_1():
     for i, (x,y) in enumerate(product(w1,w2)):
         Z[np.unravel_index(i, (len(X),len(Y)))] = l_simple(np.array([[x],[y]]))
     
-    #R = np.sqrt(X**2 + Y**2)
-    #Z = np.sin(R)
-    #print(Z)
-    #pass
-    #print(zip(X))
-    #zs = np.array([l_simple(np.array([[x],[y]]) for x,y in zip(np.ravel(X),np.ravel(Y)))])
-
-    #Z = zs.reshape(X.shape)
-
-    #fig.colorbar(surf, shrink=0.5, aspect=5)
-    ax.plot_surface(X,Y,Z)
+    ax.view_init(30, 145) #To show the correct perspective of the figure.
+    ax.zaxis.set_major_locator(LinearLocator(10))
+    ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+    #colormap = cm._reverser.coolwarm
+    surf = ax.plot_surface(X,Y,Z, cmap=cm.get_cmap('coolwarm'))
+    fig.colorbar(surf)
+    pyplot.title("Task 1")
     pyplot.show()
 
 w=np.array([[1,0]])
