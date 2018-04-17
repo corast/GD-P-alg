@@ -8,7 +8,7 @@ from matplotlib.ticker import LinearLocator, FormatStrFormatter
 
 def sigmoid(w,x):
     """ Calculate the sigmoid value
-    w should be a 1,2 matrix, and x and 2,1 matrix """
+    w should be a 1,2 matrix, and x an 2,1 matrix """
     return np.asscalar(1/(1+np.exp(-np.dot(w.transpose(),x))))
 
 def l_simple(w):
