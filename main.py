@@ -44,7 +44,7 @@ def l_simple_t3(w):
     W=np.array(w)
     return (sigmoid(W, np.array([[1],[0]]))-1)**2 + (sigmoid(W, np.array([[0],[1]])))**2 + (sigmoid(W, np.array([[1],[1]])-1)**2)**2
 
-def task3_gradientDecent(lrate, itterations, w=[0, 6]): 
+def task3_gradientDecent(lrate, itterations, w=[0, 0]): 
     """ Run some itterations and return w, need to pass some w to begin with"""
     weights = w.copy()
     for x in range(itterations):
@@ -53,19 +53,21 @@ def task3_gradientDecent(lrate, itterations, w=[0, 6]):
         #print("gradw2 {} change {}".format(task3_Lsimplew2(weights),lrate * task3_Lsimplew2(weights)))
         weights[0] = weights[0] - lrate * task3_Lsimplew1(weights)
         weights[1] = weights[1] - lrate * task3_Lsimplew2(weights)
-    print("lrate={} \t itterations={} w={} l_loss {} -> {} end".format(lrate,(x+1),weights,l_simple_t3(w),l_simple_t3(weights) ))
+    #print("lrate={} \t itterations={} w={} l_loss {} -> {} end".format(lrate,(x+1),weights,l_simple_t3(w),l_simple_t3(weights) ))
     return weights
 
 def task3_Lsimplew1(w):
-    """ Derivate for  """
+    """ Derivate for w1 """
     gradient_w1 = -2*np.exp(-2*w[0])/np.power((1+np.exp(-w[0])), 3) - 2*np.exp(-2*(w[0]+w[1]))/np.power(1+np.exp(-(w[0]+w[1])), 3)
     return gradient_w1
 
 def task3_Lsimplew2(w):
+    """ Derivate for w2 """
     gradient_w2 = 2*np.exp(-w[1])/np.power(np.exp(-w[1]), 3) - 2*np.exp(-2 * (w[0]+w[1]) ) / np.power(1 + np.exp(-(w[0]+w[1])), 3)
     return gradient_w2
 
 def task3_showResults():
+    """ Test different values of the learning rate. """
     task3_gradientDecent(0.0001,100)
     task3_gradientDecent(0.001,100)
     task3_gradientDecent(0.01,100)
@@ -74,8 +76,51 @@ def task3_showResults():
     task3_gradientDecent(10,100)
     task3_gradientDecent(100,100)
 
+def task3_find_weights():
+    #calcualte the different weights from using differnt learning rates.
+    lrates = [0.0001,0.001,0.01] #[ 0.00001*10**x for x in range(1,5,1)]
+    lrates.extend(list(np.arange(0.1,1.1,0.1)))
+    lrates.extend(range(10,110,10))
+    Weights = []
+    for i in range(1,4,1):
+        W = []
+        for learning_rate in lrates:
+            W.append(task3_gradientDecent(learning_rate,10**i))
+        Weights.append(W)
+    return Weights, lrates, [10,100,1000]
+
+def task3_plot_result():
+    """ Plot the graph for task 3"""
+    #We need to plot L() simple, and learning rate. Itterations and initial weights stay the same.
+
+    W, lrates, iterations = task3_find_weights()
+    LsimpleAll = []
+    fig, ax = pyplot.subplots()
+    for i, itt_w in enumerate(W):
+        #We got one list of multiple weights per itteration n.
+        Lsimple = []
+        for weight in itt_w:
+            #each element cointain w1 and w2 weights.
+            Lsimple.append(l_simple_t3(weight))
+        LsimpleAll.append(Lsimple)
+        ax.plot(lrates,Lsimple,label=iterations[i])
+    legend = ax.legend(loc='upper right')
+
+    pyplot.ylabel("Lsimple(w)")
+    pyplot.xlabel("learning rate (log form)")
+    pyplot.xscale('log')
+    pyplot.yscale('logit')
+    pyplot.grid()
+    pyplot.title("w0=[0,0] with different itterations")
+    #pyplot.plot(lrates,Lsimple)
+    
+    pyplot.show()
+ 
 #TASK 1
 #task_1()
 
 #TASK 3
-task3_showResults()
+#task3_showResults()
+#Task 3 Plot
+task3_plot_result()
+
