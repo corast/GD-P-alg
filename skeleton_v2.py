@@ -28,7 +28,7 @@ def batch_GD(data, learning_rate=0.1, niterations=1000, randomW=True):
     for t in range(niterations):
         #need to update the gradient after every itteration.
         grad = np.reshape(np.zeros(dim),(dim,1)).transpose()
-        for d in range(num_n):
+        for d in range(num_n):#for every data set
             wTx = np.dot(W, x_train[d])
             A = np.exp(-wTx)
             B = np.power(1+A,2)
@@ -54,13 +54,13 @@ def stochastic_GD(data, learning_rate=0.1, niterations=1000,randomW=True):
 
     for t in range(niterations):#Loop tru n iterations.
    
-        for d in range(num_n):#loop tru ever data point.
-            wTx = np.dot(W, x_train[d])
-            A = np.exp(-wTx)
-            B = np.power(1+A,2)
-            E = logistic_z(wTx) - y_train[d]
-            grad = E*A/B*x_train[d]
-            W = W - learning_rate*grad
+        #for d in range(num_n):#loop tru ever data point.
+        wTx = np.dot(W, x_train[t])
+        A = np.exp(-wTx)
+        B = np.power(1+A,2)
+        E = logistic_z(wTx) - y_train[t]
+        grad = E*A/B*x_train[t]
+        W = W - learning_rate*grad
     return W
 
 def loadData(file):

@@ -14,14 +14,13 @@ def sigmoid(w,x):
 def l_simple(w):
     """ Loss function, calculate the error """
     W=w
-    #print(W)
-    return (sigmoid(W, np.array([[1],[0]]))-1)**2 + (sigmoid(W, np.array([[0],[1]])))**2 + (sigmoid(W, np.array([[1],[1]])-1)**2)**2
+    return (sigmoid(W, np.array([[1],[0]]))-1)**2 + (sigmoid(W, np.array([[0],[1]])))**2 + (sigmoid(W, np.array([[1],[1]])-1)**2)
 
 def task_1():
     """ Plot the graph for task 1"""
     fig = pyplot.figure()
     ax = fig.gca(projection='3d')
-    w1 = w2 = np.arange(-6,6.1,0.1)
+    w1 = w2 = np.arange(-20,20.1,0.1)
     X,Y = np.meshgrid(w1,w2)
     Z = np.zeros((len(X),len(Y)))
     for i, (x,y) in enumerate(product(w1,w2)):
@@ -42,9 +41,9 @@ def task_1():
 def l_simple_t3(w):
     """ Loss function, calculate the error """
     W=np.array(w)
-    return (sigmoid(W, np.array([[1],[0]]))-1)**2 + (sigmoid(W, np.array([[0],[1]])))**2 + (sigmoid(W, np.array([[1],[1]])-1)**2)**2
+    return (sigmoid(W, np.array([[1],[0]]))-1)**2 + (sigmoid(W, np.array([[0],[1]])))**2 + (sigmoid(W, np.array([[1],[1]])-1)**2)
 
-def task3_gradientDecent(lrate, itterations, w=[0, 0]): 
+def task3_gradientDecent(lrate, itterations, w=[6, -6]): 
     """ Run some itterations and return w, need to pass some w to begin with"""
     weights = w.copy()
     for x in range(itterations):
@@ -63,18 +62,15 @@ def task3_Lsimplew1(w):
 
 def task3_Lsimplew2(w):
     """ Derivate for w2 """
-    gradient_w2 = 2*np.exp(-w[1])/np.power(np.exp(-w[1]), 3) - 2*np.exp(-2 * (w[0]+w[1]) ) / np.power(1 + np.exp(-(w[0]+w[1])), 3)
+    gradient_w2 = 2*np.exp(-w[1])/np.power(1+np.exp(-w[1]), 3) - 2*np.exp(-2 * (w[0]+w[1]) ) / np.power(1 + np.exp(-(w[0]+w[1])), 3)
     return gradient_w2
 
 def task3_showResults():
     """ Test different values of the learning rate. """
-    task3_gradientDecent(0.0001,100)
-    task3_gradientDecent(0.001,100)
-    task3_gradientDecent(0.01,100)
-    task3_gradientDecent(0.1,100)
-    task3_gradientDecent(1,100)
-    task3_gradientDecent(10,100)
-    task3_gradientDecent(100,100)
+
+    for x in [0.0001, 0.001, 0.01, 0.1, 1, 10, 100]:
+        task3_gradientDecent(x, 100)
+
 
 def task3_find_weights():
     #calcualte the different weights from using differnt learning rates.
@@ -105,15 +101,13 @@ def task3_plot_result():
         LsimpleAll.append(Lsimple)
         ax.plot(lrates,Lsimple,label=iterations[i])
     legend = ax.legend(loc='upper right')
-
     pyplot.ylabel("Lsimple(w)")
     pyplot.xlabel("learning rate (log form)")
     pyplot.xscale('log')
-    pyplot.yscale('logit')
+    #pyplot.yscale('logit')
     pyplot.grid()
-    pyplot.title("w0=[0,0] with different itterations")
+    pyplot.title("w0=[0, 0] with different itterations")
     #pyplot.plot(lrates,Lsimple)
-    
     pyplot.show()
  
 #TASK 1
@@ -122,5 +116,5 @@ def task3_plot_result():
 #TASK 3
 #task3_showResults()
 #Task 3 Plot
-task3_plot_result()
+task3_plot_result() 
 
