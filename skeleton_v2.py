@@ -6,6 +6,9 @@ import matplotlib
 from matplotlib import cm
 import time
 
+def namestr(obj, namespace):
+    return [name for name in namespace if namespace[name] is obj]
+
 def logistic_z(z): 
     return 1.0/(1.0+np.exp(-z))
 
@@ -25,6 +28,7 @@ def batch_GD(data, learning_rate=0.1, niterations=1000, randomW=True):
     #Split training data from value.
     x_train = np.delete(data, dim,axis=1)
     y_train = np.reshape(data[:,dim],(num_n,1))
+    weights_all.append(W)
     for t in range(niterations):
         #need to update the gradient after every itteration.
         grad = np.reshape(np.zeros(dim),(dim,1)).transpose()
@@ -35,7 +39,7 @@ def batch_GD(data, learning_rate=0.1, niterations=1000, randomW=True):
             E = logistic_z(wTx) - y_train[d]
             grad += E*A/B*x_train[d]
         W = W - (learning_rate/num_n)*grad
-
+        weights_all.append(W)
     return W
 
 def stochastic_GD(data, learning_rate=0.1, niterations=1000,randomW=True):
@@ -51,9 +55,9 @@ def stochastic_GD(data, learning_rate=0.1, niterations=1000,randomW=True):
     #Split training data from value.
     x_train = np.delete(data, dim-1,axis=1)
     y_train = np.reshape(data[:,dim-1],(num_n,1))
-
+    weights_all.append(W)
     for t in range(niterations):#Loop tru n iterations.
-   
+
         #for d in range(num_n):#loop tru ever data point.
         wTx = np.dot(W, x_train[t])
         A = np.exp(-wTx)
@@ -61,7 +65,9 @@ def stochastic_GD(data, learning_rate=0.1, niterations=1000,randomW=True):
         E = logistic_z(wTx) - y_train[t]
         grad = E*A/B*x_train[t]
         W = W - learning_rate*grad
+        weights_all.append(W)
     return W
+
 
 def loadData(file):
     df = pd.read_csv(file, sep='\t')
@@ -77,7 +83,7 @@ def classify_2(w, x):
     z = np.dot(w,x)
     return 0 if (logistic_z(z)<0.5) else 1
 
-def train_and_plot(data_train,data_test,training_method,learn_rate=0.1,niter=1000):
+def train_and_plot(data_train,data_test,training_method,learn_rate=0.1,niter=1000, plot_scatter = True):
     plt.figure()
     #train data
 
@@ -94,38 +100,60 @@ def train_and_plot(data_train,data_test,training_method,learn_rate=0.1,niter=100
     print("{} \n{} seconds".format(training_method.__name__ ,time_elapsed))
     print("weights: {}".format(np.squeeze(w)))
     #measure error with the trained weights.
-    error=0
-    for d in range(num_n): 
-        #Check the data.
-        #We plot the x1,x2 with the colour and shape for correct or incorrect estimates.
-        #rint(np.reshape(x_test[d],(dim,1)))
-        estimate = classify_2(w,x_test[d])
-        if(y_test[d] == 0):
-            if(estimate != y_test[d]):
-                plt.plot(x_test[d][1],x_test[d][2], 'rx')
-                error+=1
+    if(plot_scatter):
+        error=0
+        for d in range(num_n): 
+            #Check the data.
+            #We plot the x1,x2 with the colour and shape for correct or incorrect estimates.
+            #rint(np.reshape(x_test[d],(dim,1)))
+            estimate = classify_2(w,x_test[d])
+            if(y_test[d] == 0):
+                if(estimate != y_test[d]):
+                    plt.plot(x_test[d][1],x_test[d][2], 'rx')
+                    error+=1
+                else:
+                    plt.plot(x_test[d][1],x_test[d][2], 'ro')
             else:
-                plt.plot(x_test[d][1],x_test[d][2], 'ro')
-        else:
-            if(estimate != y_test[d]):
-                plt.plot(x_test[d][1],x_test[d][2], 'gx')
-                error+=1
-            else:
-                plt.plot(x_test[d][1],x_test[d][2], 'go')
-    print("{} % error".format(error/num_n*100))
-    plt.ylabel("x2")
-    plt.xlabel("x1")
-    title = "red=0, green=1 " + training_method.__name__
- 
-    x = np.arange(-2,4,0.1)
-    plt.plot(x,b(x,np.squeeze(w)),'k-')
-    plt.title(title)
+                if(estimate != y_test[d]):
+                    plt.plot(x_test[d][1],x_test[d][2], 'gx')
+                    error+=1
+                else:
+                    plt.plot(x_test[d][1],x_test[d][2], 'go')
+        print("{} % error".format(error/num_n*100))
+    else:
+        print("checking error")
+        error_rates=[]
+        for i,weigh in enumerate(weights_all):
+            error=0
+            w = weights_all[i]
+            for d in range(num_n):
+                estimate = classify_2(w,x_test[d])
+                #print(estimate,y_test[d])
+                if(y_test[d] != estimate):
+                    error+=1
+            #print(error/num_n*100)
+            error_rates.append(error/num_n)
+            
+        plt.plot(range(len(error_rates)),error_rates)
+        plt.ylim(0,1)
+        plt.ylabel("erro_rate")
+        plt.xlabel("itteration")
+        title = training_method.__name__ 
+        plt.title(title)    
 
-    #scale figure according to data points.
-    min_x0, min_x1, min_x2 = x_test.min(axis=0)
-    max_x0, max_x1, max_x2 = x_test.max(axis=0)
-    plt.xlim(min_x1,max_x1)
-    plt.ylim(min_x2,max_x2)
+    if(plot_scatter):
+        plt.ylabel("x2")
+        plt.xlabel("x1")
+        title = "red=0, green=1 " + training_method.__name__
+        x = np.arange(-2,4,0.1)
+        plt.plot(x,b(x,np.squeeze(w)),'k-')
+        plt.title(title)
+        #scale figure according to data points.
+        min_x0, min_x1, min_x2 = x_test.min(axis=0)
+        max_x0, max_x1, max_x2 = x_test.max(axis=0)
+        plt.xlim(min_x1,max_x1)
+        plt.ylim(min_x2,max_x2)
+        #We want to plot the error for each itteration instead.
 
     plt.show()
 
@@ -135,7 +163,7 @@ def b(x,W):
     #return -np.squeeze(np.asarray(W[0]))/np.squeeze(np.asarray(W[2])) - (np.squeeze(np.asarray(W[1])))/(np.squeeze(np.asarray(W[2])))*x
 
 
-error_rate = [] #store error rates.
+weights_all = [] #store error rates.
 
 data_big_nonsep_test = loadData("data/data_big_nonsep_test.csv")
 data_big_nonsep_train = loadData("data/data_big_nonsep_train.csv")
@@ -149,4 +177,12 @@ data_small_nonsep_test = loadData("data/data_small_nonsep_test.csv")
 data_small_separable_train = loadData("data/data_small_separable_train.csv")
 data_small_separable_test = loadData("data/data_small_separable_test.csv")
 
-train_and_plot(data_small_separable_train, data_small_separable_test, stochastic_GD)
+#train_and_plot(data_small_separable_train, data_small_separable_test, stochastic_GD)
+#train_and_plot(data_small_nonsep_train, data_small_nonsep_test, stochastic_GD, plot_scatter=False)
+#train_and_plot(data_big_nonsep_train, data_big_nonsep_test, stochastic_GD, plot_scatter = False)
+#train_and_plot(data_big_separable_train, data_big_separable_test, stochastic_GD, plot_scatter=False)
+
+#train_and_plot(data_small_separable_train, data_small_separable_test, batch_GD)
+#train_and_plot(data_small_nonsep_train, data_small_nonsep_test, batch_GD, plot_scatter=False)
+#train_and_plot(data_big_nonsep_train, data_big_nonsep_test, batch_GD)
+#train_and_plot(data_big_separable_train, data_big_separable_test, batch_GD, plot_scatter=False)
