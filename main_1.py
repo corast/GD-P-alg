@@ -14,19 +14,20 @@ def sigmoid(w,x):
 def l_simple(w):
     """ Loss function, calculate the error """
     W=w
-    return (sigmoid(W, np.array([[1],[0]]))-1)**2 + (sigmoid(W, np.array([[0],[1]])))**2 + (sigmoid(W, np.array([[1],[1]])-1)**2)
+    return (sigmoid(W, np.array([[1],[0]]))-1)**2 + sigmoid(W, np.array([[0],[1]]))**2 + sigmoid(W, np.array([[1],[1]])-1)**2
 
 def task_1():
     """ Plot the graph for task 1"""
     fig = pyplot.figure()
     ax = fig.gca(projection='3d')
-    w1 = w2 = np.arange(-20,20.1,0.1)
+    w1 = w2 = np.arange(-6,6.1,0.1)
     X,Y = np.meshgrid(w1,w2)
     Z = np.zeros((len(X),len(Y)))
     for i, (x,y) in enumerate(product(w1,w2)):
         Z[np.unravel_index(i, (len(X),len(Y)))] = l_simple(np.array([[x],[y]]))
-    
-    ax.view_init(30, 145) #To show the correct perspective of the figure.
+ 
+    Z = Z.transpose()#This is because we of the order we generate the elements.
+    ax.view_init(18, -60) #To show the correct perspective of the figure.
     ax.zaxis.set_major_locator(LinearLocator(10))
     ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
     ax.set_xlabel("w1")
@@ -43,16 +44,13 @@ def l_simple_t3(w):
     W=np.array(w)
     return (sigmoid(W, np.array([[1],[0]]))-1)**2 + (sigmoid(W, np.array([[0],[1]])))**2 + (sigmoid(W, np.array([[1],[1]])-1)**2)
 
-def task3_gradientDecent(lrate, itterations, w=[6, -6]): 
+def task3_gradientDecent(lrate, itterations=1000, w=[0, 0]): 
     """ Run some itterations and return w, need to pass some w to begin with"""
     weights = w.copy()
     for x in range(itterations):
-        #print("epoch {} weights {} l_loss {}".format(x, weights,l_simple_t3(weights) ))
-        #print("gradw1 {} change {}".format(task3_Lsimplew1(weights), lrate * task3_Lsimplew1(weights)))
-        #print("gradw2 {} change {}".format(task3_Lsimplew2(weights),lrate * task3_Lsimplew2(weights)))
-        weights[0] = weights[0] - lrate * task3_Lsimplew1(weights)
-        weights[1] = weights[1] - lrate * task3_Lsimplew2(weights)
-    #print("lrate={} \t itterations={} w={} l_loss {} -> {} end".format(lrate,(x+1),weights,l_simple_t3(w),l_simple_t3(weights) ))
+        weights[0] = weights[0] - lrate * task3_Lsimplew1(weights) #move against the gradient
+        weights[1] = weights[1] - lrate * task3_Lsimplew2(weights) #move against the gradient
+    print("lrate={} \t itterations={} w={} l_loss {} -> {} end".format(lrate,(x+1),weights,l_simple_t3(w),l_simple_t3(weights) ))
     return weights
 
 def task3_Lsimplew1(w):
@@ -69,7 +67,7 @@ def task3_showResults():
     """ Test different values of the learning rate. """
 
     for x in [0.0001, 0.001, 0.01, 0.1, 1, 10, 100]:
-        task3_gradientDecent(x, 100)
+        task3_gradientDecent(x, 1000, w=[0,0])
 
 
 def task3_find_weights():
